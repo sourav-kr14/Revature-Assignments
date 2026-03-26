@@ -1,0 +1,147 @@
+CREATE DATABASE BANKINGDB;
+USE  BANKINGDB;
+
+-- CUSTOMER TABLE
+CREATE TABLE CUSTOMERS(
+CUSTOMERID INT auto_increment PRIMARY KEY,
+CUSTOMERNAME VARCHAR(100) NOT NULL,
+GENDER ENUM('MALE','FEMALE','OTHER'),
+DATEOFBIRTH DATE,
+PHONENUMBER VARCHAR(15) UNIQUE,
+EMAIL VARCHAR(100) UNIQUE,
+CITY VARCHAR(50),
+STATE VARCHAR(50),
+CUSTOMERSTATUS ENUM('ACTIVE','INACTIVE') DEFAULT 'ACTIVE'
+);
+
+-- BRANCHES TABLE
+CREATE TABLE Branches (
+    BranchId INT AUTO_INCREMENT PRIMARY KEY,
+    BranchName VARCHAR(100) NOT NULL,
+    BranchCode VARCHAR(10) UNIQUE,
+    City VARCHAR(50),
+    State VARCHAR(50),
+    IFSCCode VARCHAR(15) UNIQUE
+);
+
+-- ACCOUNTS TABLE
+CREATE TABLE Accounts (
+    AccountId INT AUTO_INCREMENT PRIMARY KEY,
+    CustomerId INT,
+    BranchId INT,
+    AccountNumber VARCHAR(20) UNIQUE,
+    AccountType ENUM('Savings','Current','Fixed Deposit'),
+    OpenDate DATE,
+    Balance DECIMAL(10,2),
+    AccountStatus ENUM('Active','Closed','Frozen') DEFAULT 'Active',
+    FOREIGN KEY (CustomerId) REFERENCES Customers(CustomerId),
+    FOREIGN KEY (BranchId) REFERENCES Branches(BranchId)
+);
+
+-- TRANSACTIONS TABLE
+CREATE TABLE Transactions (
+    TransactionId INT AUTO_INCREMENT PRIMARY KEY,
+    AccountId INT,
+    TransactionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TransactionType ENUM('Deposit','Withdrawal','Transfer'),
+    Amount DECIMAL(10,2),
+    Description VARCHAR(255),
+    FOREIGN KEY (AccountId) REFERENCES Accounts(AccountId)
+);
+
+-- LOANS TABLE
+CREATE TABLE Loans (
+    LoanId INT AUTO_INCREMENT PRIMARY KEY,
+    CustomerId INT,
+    BranchId INT,
+    LoanType ENUM('Home Loan','Car Loan','Personal Loan','Education Loan'),
+    LoanAmount DECIMAL(12,2),
+    InterestRate DECIMAL(5,2),
+    LoanStartDate DATE,
+    LoanStatus ENUM('Approved','Pending','Closed'),
+    FOREIGN KEY (CustomerId) REFERENCES Customers(CustomerId),
+    FOREIGN KEY (BranchId) REFERENCES Branches(BranchId)
+);
+
+
+-- ACCOUNTAUDIT TABLE
+CREATE TABLE AccountAudit (
+    AuditId INT AUTO_INCREMENT PRIMARY KEY,
+    AccountId INT,
+    ActionType VARCHAR(50),
+    OldBalance DECIMAL(10,2),
+    NewBalance DECIMAL(10,2),
+    ActionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Remarks VARCHAR(255)
+);
+
+-- DATA INSERTION
+INSERT INTO Customers (CustomerName, Gender, PhoneNumber, Email, City, State)
+VALUES 
+('Sourav', 'Male', '9876543210', 'sourav@mail.com', 'Ranchi', 'Jharkhand'),
+('Rahul', 'Male', '9876543211', 'rahul@mail.com', 'Chennai', 'Tamil Nadu');
+
+INSERT INTO Branches (BranchName, BranchCode, City, State, IFSCCode)
+VALUES 
+('Main Branch', 'BR001', 'Ranchi', 'Jharkhand', 'IFSC0001'),
+('City Branch', 'BR002', 'Chennai', 'Tamil Nadu', 'IFSC0002');
+
+INSERT INTO Accounts (CustomerId, BranchId, AccountNumber, AccountType, OpenDate, Balance)
+VALUES 
+(1,1,'ACC001','Savings','2023-01-01',50000),
+(2,2,'ACC002','Savings','2023-02-01',150000);
+
+INSERT INTO Loans (CustomerId, BranchId, LoanType, LoanAmount, InterestRate, LoanStartDate, LoanStatus)
+VALUES 
+(1,1,'Personal Loan',50000,10.5,'2023-03-01','Approved'),
+(2,2,'Home Loan',500000,8.5,'2023-04-01','Pending');
+
+SELECT * FROM CUSTOMERS;
+SELECT * FROM BRANCHES;
+SELECT * FROM LOANS;
+SELECT * FROM ACCOUNTS;
+
+-- SUBQUERY
+-- 1
+SELECT * FROM CUSTOMERS WHERE CUSTOMERID IN 
+(SELECT CUSTOMERID FROM ACCOUNTS WHERE BALANCE>(SELECT AVG(BALANCE) FROM ACCOUNTS));
+
+
+-- 2
+SELECT * FROM CUSTOMERS WHERE CUSTOMERID IN 
+(SELECT CUSTOMERID FROM LOANS WHERE LOANAMOUNT > (SELECT MAX(LOANAMOUNT)FROM LOANS WHERE LOANTYPE='PERSONAL LOAN'));
+
+-- 3
+SELECT * FROM ACCOUNTS WHERE BRANCHID IN(
+SELECT BRANCHID FROM BRANCHES WHERE CITY='CHENNAI'
+ );
+
+-- 4
+SELECT * FROM CUSTOMERS WHERE CUSTOMERID NOT IN 
+(
+SELECT CUSTOMERID FROM LOANS
+) ;
+
+-- 5
+SELECT CUSTOMERID FROM ACCOUNTS 
+WHERE ACCOUNTID in(
+SELECT ACCOUNTID FROM TRANSACTIONS GROUP BY ACCOUNTID
+HAVING SUM(AMOUNT) > (SELECT  SUM(AMOUNT) FROM TRANSACTIONS  WHERE ACCOUNTID IN (SELECT ACCOUNTID FROM ACCOUNTS WHERE CUSTOMERID =1))
+);
+
+-- 6
+SELECT * FROM Branches WHERE BranchId IN (
+SELECT BranchId FROM Accounts GROUP BY BranchId HAVING COUNT(*) > 
+(
+SELECT AVG(AccountCount)FROM ( SELECT COUNT(*) AS AccountCount  FROM Accounts 
+ GROUP BY BranchId ) AS temp )
+);
+
+
+-- 7
+SELECT * FROM ACCOUNTS WHERE BALANCE =
+(SELECT MAX(BALANCE)FROM ACCOUNTS WHERE BALANCE < (SELECT MAX(BALANCE ) FROM ACCOUNTS)
+) 
+
+
+
