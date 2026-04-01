@@ -7,6 +7,5 @@ public class CardiologyService
         System.out.println("== Cardiology Services ==");
         System.out.println("Name of patient     "+patientName);
         System.out.println("Your token number is    "+token);
-
     }
 }

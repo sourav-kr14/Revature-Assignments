@@ -6,8 +6,6 @@ public class TokenManager {
     private TokenManager() {
         hospitalName="SK Hospitals";
         currentTokenNumber=0;
-
-
     }
     public static TokenManager getInstance()
     {

@@ -6,6 +6,5 @@ public class GeneralMedicineService {
         System.out.println("== General Medicine Service ==");
         System.out.println("Name of patient     "+patientName);
         System.out.println("Your token number is    "+token);
-
     }
 }
