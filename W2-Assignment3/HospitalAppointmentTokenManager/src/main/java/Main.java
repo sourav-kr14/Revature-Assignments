@@ -19,15 +19,10 @@ public class Main {
         tokenManager.displayCurrentTokenStatus();
 
 
-        TokenManager tm1= TokenManager.getInstance();
-        TokenManager tm2= TokenManager.getInstance();
+        TokenManager tm1 = TokenManager.getInstance();
+        TokenManager tm2 = TokenManager.getInstance();
         System.out.println("======================");
-        System.out.println("Is Singleton Verified   "+(tm1 == tm2));
-
-
-
-
-
+        System.out.println("Is Singleton Verified   " + (tm1 == tm2));
     }
 
 }
