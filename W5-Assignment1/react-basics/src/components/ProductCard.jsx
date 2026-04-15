@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
-  const lowStock = product.stock < 10 && product.stock > 0;
+  const lowStock = product.stock < 5 && product.stock > 0;
   const outOfStock = product.stock === 0;
   return (
     <div
